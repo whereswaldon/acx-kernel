@@ -33,26 +33,31 @@ typedef void		(*PTHREAD)(void);
  */
 #define STACK_START	0x21FF
 #define INIT_SPACE	0x80
-#define TH0_START	(INIT_SPACE+STACK_START)
-#define TH1_START	(TH0_START+TH0_SIZE)
-#define TH2_START	(TH1_START+TH1_SIZE)
-#define TH3_START	(TH2_START+TH2_SIZE)
-#define TH4_START	(TH3_START+TH3_SIZE)
-#define TH5_START	(TH4_START+TH4_SIZE)
-#define TH6_START	(TH5_START+TH5_SIZE)
-#define TH7_START	(TH6_START+TH6_SIZE)
+#define TH0_START	((byte *)STACK_START-INIT_SPACE)
+#define TH1_START	((byte *)TH0_START-TH0_SIZE)
+#define TH2_START	((byte *)TH1_START-TH1_SIZE)
+#define TH3_START	((byte *)TH2_START-TH2_SIZE)
+#define TH4_START	((byte *)TH3_START-TH3_SIZE)
+#define TH5_START	((byte *)TH4_START-TH4_SIZE)
+#define TH6_START	((byte *)TH5_START-TH5_SIZE)
+#define TH7_START	((byte *)TH6_START-TH6_SIZE)
 
 /*
  * Define the positions of each canary
  */
-#define TH0_CANARY	(TH1_START-1)
-#define TH1_CANARY	(TH2_START-1)
-#define TH2_CANARY	(TH3_START-1)
-#define TH3_CANARY	(TH4_START-1)
-#define TH4_CANARY	(TH5_START-1)
-#define TH5_CANARY	(TH6_START-1)
-#define TH6_CANARY	(TH7_START-1)
-#define TH7_CANARY	(TH7_START+TH7_SIZE-1)
+#define TH0_CANARY	(TH1_START+1)
+#define TH1_CANARY	(TH2_START+1)
+#define TH2_CANARY	(TH3_START+1)
+#define TH3_CANARY	(TH4_START+1)
+#define TH4_CANARY	(TH5_START+1)
+#define TH5_CANARY	(TH6_START+1)
+#define TH6_CANARY	(TH7_START+1)
+#define TH7_CANARY	(TH7_START-TH7_SIZE+1)
+
+/*
+ * Define the value of the canaries
+ */
+#define CANARY_VALUE	0xAA
 
 /*
  * Define ACX function prototypes

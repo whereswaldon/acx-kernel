@@ -6,13 +6,25 @@
  */ 
 
 #include <avr/io.h>
+#include <stdio.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+#include "acx.h"
 
 
 int main(void)
 {
-    /* Replace with your application code */
-    while (1) 
-    {
-    }
+	x_init();
+	
+	_delay_ms(100);
+	DDRB=0x80;
+	while (1) 
+	{
+		PORTB ^= 0x80;
+		_delay_ms(100);
+		PORTB = 0;
+		_delay_ms(100);
+	}
+	return 0;
 }
 

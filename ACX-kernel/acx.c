@@ -5,6 +5,8 @@
  * @author Christopher Waldon
  */
 
+#include <avr/io.h>
+#include <avr/interrupt.h>
 #include <stdio.h>
 #include "acx.h"
 
@@ -17,6 +19,8 @@
  * of each stack for each thread.
  */
 Stack stacks[NUM_THREADS];
+
+StackDelay stackDelays[NUM_THREADS];
 
 /**
  * These three bytes encode the current delay, disable,
@@ -33,6 +37,16 @@ byte suspends;
  */
 uint32_t ticks;
 
+/*
+ * Defines the id of the currently executing thread.
+ */
+byte x_thread_id;
+
+/*
+ * TODO: document this
+ */
+byte x_thread_mask;
+
 
 /***********************************************|
  * Define functions ****************************|
@@ -44,7 +58,82 @@ uint32_t ticks;
  * function becomes Thread0.
  */
 void x_init() {
+	//initialize stacks
+	stacks[0].pHead = (byte *)TH0_START;
+	stacks[0].pBase = (byte *)TH0_START;
+	stacks[1].pHead = (byte *)TH1_START;
+	stacks[1].pBase = (byte *)TH1_START;
+	stacks[2].pHead = (byte *)TH2_START;
+	stacks[2].pBase = (byte *)TH2_START;
+	stacks[3].pHead = (byte *)TH3_START;
+	stacks[3].pBase = (byte *)TH3_START;
+	stacks[4].pHead = (byte *)TH4_START;
+	stacks[4].pBase = (byte *)TH4_START;
+	stacks[5].pHead = (byte *)TH5_START;
+	stacks[5].pBase = (byte *)TH5_START;
+	stacks[6].pHead = (byte *)TH6_START;
+	stacks[6].pBase = (byte *)TH6_START;
+	stacks[7].pHead = (byte *)TH7_START;
+	stacks[7].pBase = (byte *)TH7_START;
 
+	//initialize canaries
+	byte * curr_canary = (byte *)TH0_CANARY;
+	*curr_canary = CANARY_VALUE;
+	curr_canary = (byte *)TH1_CANARY;
+	*curr_canary = CANARY_VALUE;
+	curr_canary = (byte *)TH2_CANARY;
+	*curr_canary = CANARY_VALUE;
+	curr_canary = (byte *)TH3_CANARY;
+	*curr_canary = CANARY_VALUE;
+	curr_canary = (byte *)TH4_CANARY;
+	*curr_canary = CANARY_VALUE;
+	curr_canary = (byte *)TH5_CANARY;
+	*curr_canary = CANARY_VALUE;
+	curr_canary = (byte *)TH6_CANARY;
+	*curr_canary = CANARY_VALUE;
+	curr_canary = (byte *)TH7_CANARY;
+	*curr_canary = CANARY_VALUE;
+
+	//initialize counter
+	ticks = 0;
+
+	//Initialize Delays
+	stackDelays[0] = 0;
+	stackDelays[1] = 0;
+	stackDelays[2] = 0;
+	stackDelays[3] = 0;
+	stackDelays[4] = 0;
+	stackDelays[5] = 0;
+	stackDelays[6] = 0;
+	stackDelays[7] = 0;
+
+	//Disable all but thread 0
+	disables = 0xFE;
+
+	//Set initial statuses
+	delays = 0;
+	suspends = 0;
+
+	//Configure this to return as thread 0
+	x_thread_id = 0;
+	x_thread_mask = 0x01;
+
+	//Change the stack location to Thread 0's space
+	int i = 0;
+	byte * newStack = TH0_START;
+	//iterate across the old stack and copy all values
+	for (; STACK_START-i >= SP; i++) {
+		*(newStack-i) = *((byte *)STACK_START-i);
+	}
+	
+	//disable interrupts
+	cli();
+	//Set new stack pointer. +1 compensates for final
+	//increment of i.
+	SP = (int)TH0_START-i+1;
+	//set global interrupt enable
+	sei();
+	return;
 }
 
 /*
