@@ -16,6 +16,18 @@ typedef uint8_t		bool;
 typedef void		(*PTHREAD)(void);
 
 /*
+ * Define a thread ID for each thread
+ */
+#define TID0	0
+#define TID1	1
+#define TID2	2
+#define TID3	3
+#define TID4	4
+#define TID5	5
+#define TID6	6
+#define TID7	7
+
+/*
  * Define the starting size of the stacks
  */
 #define DEFAULT_SIZE	128
