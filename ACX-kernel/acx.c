@@ -146,7 +146,67 @@ void x_init() {
  * interrupt handler.
  */
 void x_new(byte tid, PTHREAD pthread, byte isEnabled) {
+	if (tid == x_thread_id) {
+		//TODO: Reinitialize current thread
+	}
+	byte low = (byte) (((int) pthread) & 0xff);
+	byte mid = (byte) ((((int) pthread) & 0xff00) >> 8);
+	byte high = (byte) ((((int) pthread) & 0xff0000) >> 16);
+	*(stacks[tid].pHead) = low;//lowbyte address
+	stacks[tid].pHead -= 1;
+	*(stacks[tid].pHead) = mid;//midbyte address
+	stacks[tid].pHead -= 1;
+	*(stacks[tid].pHead) = high;//highbyte address
+	stacks[tid].pHead -= 1;
 
+	//save register values
+	*(stacks[tid].pHead) = 2;
+	stacks[tid].pHead -= 1;
+	*(stacks[tid].pHead) = 3;
+	stacks[tid].pHead -= 1;
+	*(stacks[tid].pHead) = 4;
+	stacks[tid].pHead -= 1;
+	*(stacks[tid].pHead) = 5;
+	stacks[tid].pHead -= 1;
+	*(stacks[tid].pHead) = 6;
+	stacks[tid].pHead -= 1;
+	*(stacks[tid].pHead) = 7;
+	stacks[tid].pHead -= 1;
+	*(stacks[tid].pHead) = 8;
+	stacks[tid].pHead -= 1;
+	*(stacks[tid].pHead) = 9;
+	stacks[tid].pHead -= 1;
+	*(stacks[tid].pHead) = 10;
+	stacks[tid].pHead -= 1;
+	*(stacks[tid].pHead) = 11;
+	stacks[tid].pHead -= 1;
+	*(stacks[tid].pHead) = 12;
+	stacks[tid].pHead -= 1;
+	*(stacks[tid].pHead) = 13;
+	stacks[tid].pHead -= 1;
+	*(stacks[tid].pHead) = 14;
+	stacks[tid].pHead -= 1;
+	*(stacks[tid].pHead) = 15;
+	stacks[tid].pHead -= 1;
+	*(stacks[tid].pHead) = 16;
+	stacks[tid].pHead -= 1;
+	*(stacks[tid].pHead) = 17;
+	stacks[tid].pHead -= 1;
+	*(stacks[tid].pHead) = 28;
+	stacks[tid].pHead -= 1;
+	*(stacks[tid].pHead) = 29;
+
+	//create a bytemask to enable/disable a thread
+	byte mask = 1;
+	mask = mask << tid;
+
+	if (isEnabled) {
+	//Enable the thread
+		disables &= (~mask);
+	} else {
+		//disable the thread
+		disables |= mask;
+	}
 }
 
 /*
