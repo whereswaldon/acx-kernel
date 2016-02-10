@@ -210,20 +210,6 @@ void x_new(byte tid, PTHREAD pthread, byte isEnabled) {
 }
 
 /*
- * Invokes kernel scheduler to give other threads a
- * chance to run. Does not change state of current
- * thread. If no other threads are READY, then
- * current thread (the calling thread) is restored
- * to execution.
- *
- * Note: This function MAY NOT be called from an
- * interrupt handler.
- */
-void X_yield() {
-
-}
-
-/*
  * Delays the calling task by the specified number
  * of system “ticks”. Actually delay depends on
  * tick frequency, set at system initialization.
@@ -300,6 +286,6 @@ void x_enable(int tid) {
  * counter.
  */
 long gtime() {
-
+	return 0;
 }
 

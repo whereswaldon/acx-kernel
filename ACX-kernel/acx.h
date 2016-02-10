@@ -11,9 +11,7 @@
 #define x_getTID() 	(x_thread_id)
 #define MAX_THREADS	8
 #define NUM_THREADS	8
-typedef uint8_t		byte;
-typedef uint8_t		bool;
-typedef void		(*PTHREAD)(void);
+
 
 /*
  * Define a thread ID for each thread
@@ -71,12 +69,17 @@ typedef void		(*PTHREAD)(void);
  */
 #define CANARY_VALUE	0xAA
 
+#ifndef __ASSEMBLER__
+
+typedef uint8_t		byte;
+typedef uint8_t		bool;
+typedef void		(*PTHREAD)(void);
 /*
  * Define ACX function prototypes
  */
 void x_init();
 void x_new(byte tid, PTHREAD pthread, byte isEnabled);
-void X_yield();
+void x_yield();
 void x_delay(int ticks);
 void x_suspend(int tid);
 void x_resume(int tid);
@@ -102,4 +105,4 @@ typedef struct {
  */
 typedef uint16_t StackDelay;
 
-
+#endif

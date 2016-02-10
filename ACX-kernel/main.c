@@ -21,6 +21,7 @@ void forever() {
 int main(void)
 {
 	x_init();
+	x_yield();
 	x_new(1, forever, 1);
 	_delay_ms(100);
 	DDRB=0x80;

@@ -41,7 +41,8 @@ C_SRCS +=  \
 ../main.c
 
 
-PREPROCESSING_SRCS += 
+PREPROCESSING_SRCS +=  \
+../acx_asm.s
 
 
 ASM_SRCS += 
@@ -49,18 +50,22 @@ ASM_SRCS +=
 
 OBJS +=  \
 acx.o \
+acx_asm.o \
 main.o
 
 OBJS_AS_ARGS +=  \
 acx.o \
+acx_asm.o \
 main.o
 
 C_DEPS +=  \
 acx.d \
+acx_asm.d \
 main.d
 
 C_DEPS_AS_ARGS +=  \
 acx.d \
+acx_asm.d \
 main.d
 
 OUTPUT_FILE_PATH +=ACX-kernel.elf
@@ -96,6 +101,20 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU Assembler
+./acx_asm.o: .././acx_asm.s
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU Assembler : 4.9.2
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE) -Wa,-gdwarf2 -x assembler-with-cpp -c -mmcu=atmega2560 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.0.90\gcc\dev\atmega2560" -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)" -mrelax -Wa,-g   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
+
+./%.o: .././%.s
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU Assembler : 4.9.2
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE) -Wa,-gdwarf2 -x assembler-with-cpp -c -mmcu=atmega2560 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.0.90\gcc\dev\atmega2560" -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)" -mrelax -Wa,-g   -o "$@" "$<" 
+	@echo Finished building: $<
+	
 
 
 

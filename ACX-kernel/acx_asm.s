@@ -40,11 +40,26 @@ x_yield:
 //   Get thread ID and mask
 //------------------------------------------------------------------
 
+		lds	r20,	x_thread_id
+		lds	r21,	x_thread_mask
 
 //------------------------------------------------------------------
 // Store SP into current thread's stack-save area
 //------------------------------------------------------------------
-
+		;compute index into stacks array
+		mov	r22,	r20	;make a copy of the thread id
+		lsl	r22	  	;left shift two to multiply by 2
+		lsl	r22	  	;left shift two to multiply by 2
+		ldi	r30,	lo8(stacks)	;load the address of the array
+		ldi r31,	hi8(stacks)	;load the other byte
+		add	r30,	r22	;increment the address by index
+		adc r31,	0	;pull in the carry from previous, if any
+		
+		;write the SP into the stack save area
+		lds	r16,	(0x5d);Load SP low byte
+		st	Z,	r16	;save SP low byte
+		lds r16,		(0x5e);Load SP high byte
+		std	Z+1	,r16	;save SP high byte
 
 
 ;------------------------------------------------------------------------
@@ -71,8 +86,8 @@ x_schedule:
 ;  but for now we'll jump back to schedule loop again
 ;----------------------------------------------------------
 		; add sleep instructions here...
-
-		rjmp	x_schedule			
+		;TODO: uncomment & implement
+		;rjmp	x_schedule			
 
 ;---------------------------------------------------
 ; Restore context of next READY thread
