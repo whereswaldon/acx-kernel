@@ -47,19 +47,19 @@ x_yield:
 // Store SP into current thread's stack-save area
 //------------------------------------------------------------------
 		;compute index into stacks array
-		mov	r22,	r20	;make a copy of the thread id
-		lsl	r22	  	;left shift two to multiply by 2
-		lsl	r22	  	;left shift two to multiply by 2
+		mov	r22,	r20			;make a copy of the thread id
+		lsl	r22	  				;left shift two to multiply by 2
+		lsl	r22	  				;left shift two to multiply by 2
 		ldi	r30,	lo8(stacks)	;load the address of the array
 		ldi r31,	hi8(stacks)	;load the other byte
-		add	r30,	r22	;increment the address by index
-		adc r31,	0	;pull in the carry from previous, if any
+		add	r30,	r22			;increment the address by index
+		adc r31,	0			;pull in the carry from previous, if any
 		
 		;write the SP into the stack save area
-		lds	r16,	(0x5d);Load SP low byte
-		st	Z,	r16	;save SP low byte
-		lds r16,		(0x5e);Load SP high byte
-		std	Z+1	,r16	;save SP high byte
+		lds	r16,	(0x5d)		;Load SP low byte
+		st	Z,		r16			;save SP low byte
+		lds r16,	(0x5e)		;Load SP high byte
+		std	Z+1,	r16			;save SP high byte
 
 
 ;------------------------------------------------------------------------
@@ -70,24 +70,47 @@ x_yield:
 		.global	x_schedule
 x_schedule:
 	// determine READY status of each thread
+		lds r18,	disables	;load the disabled status
+		lds r19,	suspends	;load the suspended status
+		or	r18,	r19			;or disables and suspends
+		lds r19,	delays		;load the delayed status
+		or	r18,	r19			;or disables, suspends, and delays
 
-
-
+		lds	r20,	x_thread_id	;load the id of the current thread
+		lds r21,	x_thread_mask	;load the thread id mask
 
 ;------------------------------------------------
 ;   Loop through all threads to test for READY
 ;------------------------------------------------
+		ldi	r23,	0			;boolean flag to detect wrapping
+loop:	
+		lds	r22,	x_thread_id	;copy the thread id
+		cp	r22,	r20			;compare original thread id with loop index
+		breq		nap			;go to sleep if we've been all the way through
 
+		inc	r20					;increment thread id
+		rol r21					;rotate thread mask left
+		cpi	r21,	0			;check if thread mask is zero
+		brne skip				;jump over second rotate
+		inc r21					;reset the thread mask to one
+		ldi	r20,	0			;reset thread id to zero
+skip:	
+		mov r22,	r21			;copy the thread mask
+		and	r22,	r18			;compare thread mask to or-ed statuses
+		cpi r22,	0			;if the result is zero, this next thread is ready
+		brne loop				;else restart the loop
 
-
+		jmp	restore				;skip the nap code
 
 ;----------------------------------------------------------
 ;  SLEEP HERE:  Here's where we sleep (no threads are READY)
 ;  but for now we'll jump back to schedule loop again
 ;----------------------------------------------------------
+nap:
 		; add sleep instructions here...
+		;sleep
 		;TODO: uncomment & implement
-		;rjmp	x_schedule			
+		rjmp	x_schedule			
 
 ;---------------------------------------------------
 ; Restore context of next READY thread
