@@ -82,12 +82,7 @@ x_schedule:
 ;------------------------------------------------
 ;   Loop through all threads to test for READY
 ;------------------------------------------------
-		ldi	r23,	0			;boolean flag to detect wrapping
-loop:	
-		lds	r22,	x_thread_id	;copy the thread id
-		cp	r22,	r20			;compare original thread id with loop index
-		breq		nap			;go to sleep if we've been all the way through
-
+loop:
 		inc	r20					;increment thread id
 		rol r21					;rotate thread mask left
 		cpi	r21,	0			;check if thread mask is zero
@@ -116,15 +111,23 @@ nap:
 ; Restore context of next READY thread
 ;---------------------------------------------------
 restore:
-		//	restore SP from thread's sp
+		;r20 holds thread id
+		;r21 holds thread mask
+
+		;compute index into stacks array
+		mov	r22,	r20			;make a copy of the thread id
+		lsl	r22	  				;left shift two to multiply by 2
+		lsl	r22	  				;left shift two to multiply by 2
+		ldi	r30,	lo8(stacks)	;load the address of the array
+		ldi r31,	hi8(stacks)	;load the other byte
+		add	r30,	r22			;increment the address by index
+		adc r31,	0			;pull in the carry from previous, if any
 		
-		
-		
-				
 		// update hardware SP
-
-
-
+		ld	r23,	Z+			;load new thread's low SP byte
+		ld	r24,	Z			;load new thread's high SP byte
+		sts	(0x5d),	r23			;change lower SP byte
+		sts (0x5e),	r24			;change upper SP byte
 
 		// Restore registers
 		pop	r17
