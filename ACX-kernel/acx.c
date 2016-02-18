@@ -20,7 +20,7 @@
  */
 Stack stacks[NUM_THREADS];
 
-StackDelay stackDelays[NUM_THREADS];
+volatile Delay x_thread_delay[NUM_THREADS];
 
 /**
  * These three bytes encode the current delay, disable,
@@ -98,14 +98,14 @@ void x_init() {
 	ticks = 0;
 
 	//Initialize Delays
-	stackDelays[0] = 0;
-	stackDelays[1] = 0;
-	stackDelays[2] = 0;
-	stackDelays[3] = 0;
-	stackDelays[4] = 0;
-	stackDelays[5] = 0;
-	stackDelays[6] = 0;
-	stackDelays[7] = 0;
+	x_thread_delay[0] = 0;
+	x_thread_delay[1] = 0;
+	x_thread_delay[2] = 0;
+	x_thread_delay[3] = 0;
+	x_thread_delay[4] = 0;
+	x_thread_delay[5] = 0;
+	x_thread_delay[6] = 0;
+	x_thread_delay[7] = 0;
 
 	//Disable all but thread 0
 	disables = 0xFE;
