@@ -250,7 +250,7 @@ ISR(TIMER0_COMPA_vect){
 		//if the current thread isn't disabled
 		if (x_thread_delay[i] == 0) {
 			//enable this thread
-			disables[0x1 << i] = 0;
+			disables &= ~(0x1 << i);
 		}
 	}
 	sei(); //enable interrupts
