@@ -103,6 +103,6 @@ typedef struct {
 /**
  * StackDelay represents a delay length for a single thread
  */
-typedef uint16_t StackDelay;
+typedef uint16_t Delay;
 
 #endif
