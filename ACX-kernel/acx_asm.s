@@ -84,7 +84,7 @@ x_schedule:
 ;------------------------------------------------
 loop:
 		inc	r20					;increment thread id
-		rol r21					;rotate thread mask left
+		lsl r21					;rotate thread mask left
 		cpi	r21,	0			;check if thread mask is zero
 		brne skip				;jump over second rotate
 		inc r21					;reset the thread mask to one
@@ -114,6 +114,11 @@ restore:
 		;r20 holds thread id
 		;r21 holds thread mask
 
+		;set the thread id
+		sts x_thread_id,	r20
+		;set the thread mask
+		sts x_thread_mask, r21
+
 		;compute index into stacks array
 		mov	r22,	r20			;make a copy of the thread id
 		lsl	r22	  				;left shift two to multiply by 2
@@ -121,7 +126,7 @@ restore:
 		ldi	r30,	lo8(stacks)	;load the address of the array
 		ldi r31,	hi8(stacks)	;load the other byte
 		add	r30,	r22			;increment the address by index
-		adc r31,	0			;pull in the carry from previous, if any
+		;adc r31,	0			;pull in the carry from previous, if any
 		
 		// update hardware SP
 		ld	r23,	Z+			;load new thread's low SP byte

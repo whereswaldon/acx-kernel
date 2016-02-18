@@ -2,6 +2,7 @@
  * acx.h
  * System configuration for a basic cooperative executive
  * Kernel.
+ * @designer Edwin Frank Barry
  * @author Christopher Waldon
  */
 
@@ -80,6 +81,7 @@ typedef void		(*PTHREAD)(void);
 void x_init();
 void x_new(byte tid, PTHREAD pthread, byte isEnabled);
 void x_yield();
+void x_schedule();
 void x_delay(int ticks);
 void x_suspend(int tid);
 void x_resume(int tid);

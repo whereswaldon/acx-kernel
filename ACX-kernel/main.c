@@ -13,24 +13,18 @@
 
 
 void forever() {
+	DDRB=0x80;
 	while(1) {
-		
+		PORTB ^= 0x80;
+		x_delay(100);
 	}
 }
 
 int main(void)
 {
 	x_init();
-	x_yield();
 	x_new(1, forever, 1);
-	_delay_ms(100);
-	DDRB=0x80;
-	while (1) 
-	{
-		PORTB ^= 0x80;
-		_delay_ms(100);
-		PORTB = 0;
-		_delay_ms(100);
-	}
+	x_yield();
+	
 	return 0;
 }

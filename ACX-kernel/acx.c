@@ -2,6 +2,7 @@
  * acx.c
  * System configuration for a basic cooperative executive
  * Kernel.
+ * @designer Edwin Frank Barry
  * @author Christopher Waldon
  */
 
@@ -153,9 +154,7 @@ void x_init() {
  * interrupt handler.
  */
 void x_new(byte tid, PTHREAD pthread, byte isEnabled) {
-	if (tid == x_thread_id) {
-		//TODO: Reinitialize current thread
-	}
+
 	byte low = (byte) (((int) pthread) & 0xff);
 	byte mid = (byte) ((((int) pthread) & 0xff00) >> 8);
 	byte high = (byte) ((((int) pthread) & 0xff0000) >> 16);
@@ -167,6 +166,10 @@ void x_new(byte tid, PTHREAD pthread, byte isEnabled) {
 	stacks[tid].pHead -= 1;
 
 	//save register values
+	stacks[tid].pHead -= 1;
+	*(stacks[tid].pHead) = 28;
+	stacks[tid].pHead -= 1;
+	*(stacks[tid].pHead) = 29;
 	*(stacks[tid].pHead) = 2;
 	stacks[tid].pHead -= 1;
 	*(stacks[tid].pHead) = 3;
@@ -199,9 +202,7 @@ void x_new(byte tid, PTHREAD pthread, byte isEnabled) {
 	stacks[tid].pHead -= 1;
 	*(stacks[tid].pHead) = 17;
 	stacks[tid].pHead -= 1;
-	*(stacks[tid].pHead) = 28;
-	stacks[tid].pHead -= 1;
-	*(stacks[tid].pHead) = 29;
+
 
 	//create a bytemask to enable/disable a thread
 	byte mask = 1;
@@ -213,6 +214,10 @@ void x_new(byte tid, PTHREAD pthread, byte isEnabled) {
 	} else {
 		//disable the thread
 		disables |= mask;
+	}
+	if (tid == x_thread_id) {
+		//we've just overwritten the current thread, so reschedule
+		x_schedule();
 	}
 }
 
@@ -226,7 +231,7 @@ void x_new(byte tid, PTHREAD pthread, byte isEnabled) {
  */
 void x_delay(int ticks) {
 	//disable this thread
-	delays[x_thread_id] = 1;
+	delays |= x_thread_mask;
 	cli(); //disable interrupts
 	x_thread_delay[x_thread_id] = ticks;
 	sei(); //enable interrupts
