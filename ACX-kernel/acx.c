@@ -118,6 +118,13 @@ void x_init() {
 	x_thread_id = 0;
 	x_thread_mask = 0x01;
 
+	//initialize delay timer settings
+	TCCR0A = 0x02; // CTC mode
+	OCR0A = 250; //match at 250 (1 msec)
+	TIMSK0 = 0x02; //enable compare-match A interrupt
+	TCCR0B = 0x03; //enable global interrupts
+
+
 	//Change the stack location to Thread 0's space
 	int i = 0;
 	byte * newStack = TH0_START;
@@ -218,7 +225,35 @@ void x_new(byte tid, PTHREAD pthread, byte isEnabled) {
  * interrupt handler.
  */
 void x_delay(int ticks) {
+	//disable this thread
+	delays[x_thread_id] = 1;
+	cli(); //disable interrupts
+	x_thread_delay[x_thread_id] = ticks;
+	sei(); //enable interrupts
+	x_yield(); //reschedule
+}
 
+/*
+ * The interrupt service routine for timer0.
+ * Decrements delays for all threads and enables threads
+ * whose delay values reach zero.
+ */
+ISR(TIMER0_COMPA_vect){
+	cli(); //disable interrupts
+	int i = 0;
+	for (; i < NUM_THREADS; i++) {
+		//if the count is nonzero
+		if (x_thread_delay[i] > 0) {
+			//decrement the count
+			x_thread_delay[i]--;
+		}
+		//if the current thread isn't disabled
+		if (x_thread_delay[i] == 0) {
+			//enable this thread
+			disables[0x1 << i] = 0;
+		}
+	}
+	sei(); //enable interrupts
 }
 
 /*
