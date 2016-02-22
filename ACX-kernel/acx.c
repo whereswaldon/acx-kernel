@@ -258,6 +258,7 @@ ISR(TIMER0_COMPA_vect){
 			disables &= ~(0x1 << i);
 		}
 	}
+	ticks++;
 	sei(); //enable interrupts
 }
 
@@ -273,7 +274,7 @@ ISR(TIMER0_COMPA_vect){
  * multiple levels of suspend. 
  */
 void x_suspend(int tid) {
-
+	suspends |= (0x1 << tid);
 }
 
 /*
@@ -285,7 +286,7 @@ void x_suspend(int tid) {
  * with a counting semaphore to allow multiple levels of suspend. 
  */
 void x_resume(int tid) {
-
+	suspends &= ~(0x1 << tid);
 }
 
 /*
@@ -306,7 +307,7 @@ void x_resume(int tid) {
  * on the stack when first created.
  */
 void x_disable(int tid) {
-
+	disables |= (0x1 << tid);
 }
 
 /*
@@ -318,7 +319,7 @@ void x_disable(int tid) {
  * status bits that block the thread. 
  */
 void x_enable(int tid) {
-
+	disables &= ~(0x1 << tid);
 }
 
 /*
@@ -326,6 +327,13 @@ void x_enable(int tid) {
  * counter.
  */
 long gtime() {
-	return 0;
+	return ticks;
+}
+
+/*
+ * Returns the id of the calling thread
+ */
+byte x_getID() {
+	return x_thread_id;
 }
 
