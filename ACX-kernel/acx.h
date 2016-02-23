@@ -87,6 +87,7 @@ void x_suspend(int tid);
 void x_resume(int tid);
 void x_disable(int tid);
 void x_enable(int tid);
+byte x_getID();
 long gtime();
 
 /*********************************************************|
