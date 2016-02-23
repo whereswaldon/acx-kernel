@@ -244,7 +244,6 @@ void x_delay(int ticks) {
  * whose delay values reach zero.
  */
 ISR(TIMER0_COMPA_vect){
-	cli(); //disable interrupts
 	int i = 0;
 	for (; i < NUM_THREADS; i++) {
 		//if the count is nonzero
@@ -255,11 +254,10 @@ ISR(TIMER0_COMPA_vect){
 		//if the current thread isn't disabled
 		if (x_thread_delay[i] == 0) {
 			//enable this thread
-			disables &= ~(0x1 << i);
+			delays &= ~(0x1 << i);
 		}
 	}
 	ticks++;
-	sei(); //enable interrupts
 }
 
 /*

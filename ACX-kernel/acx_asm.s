@@ -79,10 +79,14 @@ x_schedule:
 		lds	r20,	x_thread_id	;load the id of the current thread
 		lds r21,	x_thread_mask	;load the thread id mask
 
+		ldi	r23,	0			;load loop counter
+
 ;------------------------------------------------
 ;   Loop through all threads to test for READY
 ;------------------------------------------------
 loop:
+		cpi	r23,	7			;compare loop counter to 7
+		breq x_schedule			;if equal, restart scheduling
 		inc	r20					;increment thread id
 		lsl r21					;rotate thread mask left
 		cpi	r21,	0			;check if thread mask is zero
@@ -92,6 +96,7 @@ loop:
 skip:	
 		mov r22,	r21			;copy the thread mask
 		and	r22,	r18			;compare thread mask to or-ed statuses
+		inc r23					;increment loop counter
 		cpi r22,	0			;if the result is zero, this next thread is ready
 		brne loop				;else restart the loop
 

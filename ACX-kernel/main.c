@@ -16,7 +16,7 @@ void forever() {
 	DDRB=0x80;
 	while(1) {
 		PORTB ^= 0x80;
-		x_delay(100);
+		x_delay(2);
 	}
 }
 
