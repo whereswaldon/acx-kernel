@@ -85,7 +85,7 @@ x_schedule:
 ;   Loop through all threads to test for READY
 ;------------------------------------------------
 loop:
-		cpi	r23,	7			;compare loop counter to 7
+		cpi	r23,	8			;compare loop counter to 7
 		breq x_schedule			;if equal, restart scheduling
 		inc	r20					;increment thread id
 		lsl r21					;rotate thread mask left
