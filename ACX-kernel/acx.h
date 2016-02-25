@@ -7,6 +7,20 @@
  */
 
 /*
+ * Define some hard-ware specific constants
+ */
+#define led12 PB6
+#define led11 PB5
+
+/*
+ * Define some hardware manipulation macros
+ */
+#define output_low(port, pin) (port &= ~(1 << pin))
+#define output_hi(port, pin) (port |= (1 << pin))
+#define set_input(portdir, pin) (portdir &= ~(1 << pin))
+#define set_output(portdir, pin) (portdir |= (1 << pin))
+
+/*
  * Define system constants
  */
 #define x_getTID() 	(x_thread_id)
