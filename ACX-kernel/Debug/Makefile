@@ -38,7 +38,8 @@ SUBDIRS :=
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS +=  \
 ../acx.c \
-../main.c
+../main.c \
+../serial.c
 
 
 PREPROCESSING_SRCS +=  \
@@ -51,22 +52,26 @@ ASM_SRCS +=
 OBJS +=  \
 acx.o \
 acx_asm.o \
-main.o
+main.o \
+serial.o
 
 OBJS_AS_ARGS +=  \
 acx.o \
 acx_asm.o \
-main.o
+main.o \
+serial.o
 
 C_DEPS +=  \
 acx.d \
 acx_asm.d \
-main.d
+main.d \
+serial.d
 
 C_DEPS_AS_ARGS +=  \
 acx.d \
 acx_asm.d \
-main.d
+main.d \
+serial.d
 
 OUTPUT_FILE_PATH +=ACX-kernel.elf
 
@@ -82,6 +87,8 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
+
+
 
 
 

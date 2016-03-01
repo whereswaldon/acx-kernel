@@ -39,6 +39,24 @@ Discarded input sections
  .text          0x00000000        0x0 main.o
  .data          0x00000000        0x0 main.o
  .bss           0x00000000        0x0 main.o
+ .text          0x00000000        0x0 serial.o
+ .data          0x00000000        0x0 serial.o
+ .bss           0x00000000        0x0 serial.o
+ .text.serial_open
+                0x00000000        0xa serial.o
+ .text.serial_read
+                0x00000000        0x4 serial.o
+ .text.serial_write
+                0x00000000        0x2 serial.o
+ .debug_info    0x00000000       0xf7 serial.o
+ .debug_abbrev  0x00000000       0x94 serial.o
+ .debug_aranges
+                0x00000000       0x30 serial.o
+ .debug_ranges  0x00000000       0x20 serial.o
+ .debug_line    0x00000000       0xc9 serial.o
+ .debug_str     0x00000000      0x19e serial.o
+ .comment       0x00000000       0x31 serial.o
+ .debug_frame   0x00000000       0x44 serial.o
  .text          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.9.2/avr6\libgcc.a(_exit.o)
  .data          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.9.2/avr6\libgcc.a(_exit.o)
  .bss           0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.9.2/avr6\libgcc.a(_exit.o)
@@ -91,6 +109,7 @@ LOAD C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.0.90/gcc/d
 LOAD acx.o
 LOAD acx_asm.o
 LOAD main.o
+LOAD serial.o
 START GROUP
 LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.9.2/../../../../avr/lib/avr6\libm.a
 END GROUP
@@ -483,12 +502,12 @@ END GROUP
  .debug_frame   0x00000000      0x110 acx.o
  .debug_frame   0x00000110       0x44 main.o
 
-.debug_str      0x00000000      0x266
+.debug_str      0x00000000      0x299
  *(.debug_str)
  .debug_str     0x00000000      0x24a acx.o
                                 0x28e (size before relaxing)
- .debug_str     0x0000024a       0x1c main.o
-                                0x199 (size before relaxing)
+ .debug_str     0x0000024a       0x4f main.o
+                                0x196 (size before relaxing)
 
 .debug_loc      0x00000000      0x3b6
  *(.debug_loc)

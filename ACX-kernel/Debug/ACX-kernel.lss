@@ -23,11 +23,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
   9 .debug_frame  00000154  00000000  00000000  000017f0  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    00000266  00000000  00000000  00001944  2**0
+ 10 .debug_str    00000299  00000000  00000000  00001944  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    000003b6  00000000  00000000  00001baa  2**0
+ 11 .debug_loc    000003b6  00000000  00000000  00001bdd  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000078  00000000  00000000  00001f60  2**0
+ 12 .debug_ranges 00000078  00000000  00000000  00001f93  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -178,413 +178,200 @@ Disassembly of section .text:
  108:	7b cf       	rjmp	.-266    	; 0x0 <__vectors>
 
 0000010a <x_yield>:
-		.global x_yield
-x_yield:
-//------------------------------------------------------------------
-// Save "callee-save" registers
-//------------------------------------------------------------------
-		push	r28
  10a:	cf 93       	push	r28
-		push	r29
  10c:	df 93       	push	r29
-		push	r2
  10e:	2f 92       	push	r2
-		push	r3
  110:	3f 92       	push	r3
-		push	r4
  112:	4f 92       	push	r4
-		push	r5
  114:	5f 92       	push	r5
-		push	r6
  116:	6f 92       	push	r6
-		push	r7
  118:	7f 92       	push	r7
-		push	r8
  11a:	8f 92       	push	r8
-		push	r9
  11c:	9f 92       	push	r9
-		push	r10
  11e:	af 92       	push	r10
-		push	r11
  120:	bf 92       	push	r11
-		push	r12
  122:	cf 92       	push	r12
-		push	r13
  124:	df 92       	push	r13
-		push	r14
  126:	ef 92       	push	r14
-		push	r15
  128:	ff 92       	push	r15
-		push	r16
  12a:	0f 93       	push	r16
-		push	r17
  12c:	1f 93       	push	r17
-
-//------------------------------------------------------------------
-//   Get thread ID and mask
-//------------------------------------------------------------------
-
-		lds	r20,	x_thread_id
  12e:	40 91 00 02 	lds	r20, 0x0200
-		lds	r21,	x_thread_mask
  132:	50 91 38 02 	lds	r21, 0x0238
-
-//------------------------------------------------------------------
-// Store SP into current thread's stack-save area
-//------------------------------------------------------------------
-		;compute index into stacks array
-		mov	r22,	r20			;make a copy of the thread id
  136:	64 2f       	mov	r22, r20
-		lsl	r22	  				;left shift two to multiply by 2
  138:	66 0f       	add	r22, r22
-		lsl	r22	  				;left shift two to multiply by 2
  13a:	66 0f       	add	r22, r22
-		ldi	r30,	lo8(stacks)	;load the address of the array
  13c:	e8 e1       	ldi	r30, 0x18	; 24
-		ldi r31,	hi8(stacks)	;load the other byte
  13e:	f2 e0       	ldi	r31, 0x02	; 2
-		add	r30,	r22			;increment the address by index
  140:	e6 0f       	add	r30, r22
-		adc r31,	0			;pull in the carry from previous, if any
  142:	f0 1d       	adc	r31, r0
-		
-		;write the SP into the stack save area
-		lds	r16,	(0x5d)		;Load SP low byte
  144:	00 91 5d 00 	lds	r16, 0x005D
-		st	Z,		r16			;save SP low byte
  148:	00 83       	st	Z, r16
-		lds r16,	(0x5e)		;Load SP high byte
  14a:	00 91 5e 00 	lds	r16, 0x005E
-		std	Z+1,	r16			;save SP high byte
  14e:	01 83       	std	Z+1, r16	; 0x01
 
 00000150 <x_schedule>:
-;                         if entered from x_new() function
-;-------------------------------------------------------------------------
-		.global	x_schedule
-x_schedule:
-	// determine READY status of each thread
-		lds r18,	disables	;load the disabled status
  150:	20 91 01 02 	lds	r18, 0x0201
-		lds r19,	suspends	;load the suspended status
  154:	30 91 03 02 	lds	r19, 0x0203
-		or	r18,	r19			;or disables and suspends
  158:	23 2b       	or	r18, r19
-		lds r19,	delays		;load the delayed status
  15a:	30 91 02 02 	lds	r19, 0x0202
-		or	r18,	r19			;or disables, suspends, and delays
  15e:	23 2b       	or	r18, r19
-
-		lds	r20,	x_thread_id	;load the id of the current thread
  160:	40 91 00 02 	lds	r20, 0x0200
-		lds r21,	x_thread_mask	;load the thread id mask
  164:	50 91 38 02 	lds	r21, 0x0238
-
-		ldi	r23,	0			;load loop counter
  168:	70 e0       	ldi	r23, 0x00	; 0
 
 0000016a <loop>:
-
-;------------------------------------------------
-;   Loop through all threads to test for READY
-;------------------------------------------------
-loop:
-		cpi	r23,	8			;compare loop counter to 7
  16a:	78 30       	cpi	r23, 0x08	; 8
-		breq x_schedule			;if equal, restart scheduling
  16c:	89 f3       	breq	.-30     	; 0x150 <x_schedule>
-		inc	r20					;increment thread id
  16e:	43 95       	inc	r20
-		lsl r21					;rotate thread mask left
  170:	55 0f       	add	r21, r21
-		cpi	r21,	0			;check if thread mask is zero
  172:	50 30       	cpi	r21, 0x00	; 0
-		brne skip				;jump over second rotate
  174:	11 f4       	brne	.+4      	; 0x17a <skip>
-		inc r21					;reset the thread mask to one
  176:	53 95       	inc	r21
-		ldi	r20,	0			;reset thread id to zero
  178:	40 e0       	ldi	r20, 0x00	; 0
 
 0000017a <skip>:
-skip:	
-		mov r22,	r21			;copy the thread mask
  17a:	65 2f       	mov	r22, r21
-		and	r22,	r18			;compare thread mask to or-ed statuses
  17c:	62 23       	and	r22, r18
-		inc r23					;increment loop counter
  17e:	73 95       	inc	r23
-		cpi r22,	0			;if the result is zero, this next thread is ready
  180:	60 30       	cpi	r22, 0x00	; 0
-		brne loop				;else restart the loop
  182:	99 f7       	brne	.-26     	; 0x16a <loop>
-
-		jmp	restore				;skip the nap code
  184:	01 c0       	rjmp	.+2      	; 0x188 <restore>
 
 00000186 <nap>:
-;----------------------------------------------------------
-nap:
-		; add sleep instructions here...
-		;sleep
-		;TODO: uncomment & implement
-		rjmp	x_schedule			
  186:	e4 cf       	rjmp	.-56     	; 0x150 <x_schedule>
 
 00000188 <restore>:
-restore:
-		;r20 holds thread id
-		;r21 holds thread mask
-
-		;set the thread id
-		sts x_thread_id,	r20
  188:	40 93 00 02 	sts	0x0200, r20
-		;set the thread mask
-		sts x_thread_mask, r21
  18c:	50 93 38 02 	sts	0x0238, r21
-
-		;compute index into stacks array
-		mov	r22,	r20			;make a copy of the thread id
  190:	64 2f       	mov	r22, r20
-		lsl	r22	  				;left shift two to multiply by 2
  192:	66 0f       	add	r22, r22
-		lsl	r22	  				;left shift two to multiply by 2
  194:	66 0f       	add	r22, r22
-		ldi	r30,	lo8(stacks)	;load the address of the array
  196:	e8 e1       	ldi	r30, 0x18	; 24
-		ldi r31,	hi8(stacks)	;load the other byte
  198:	f2 e0       	ldi	r31, 0x02	; 2
-		add	r30,	r22			;increment the address by index
  19a:	e6 0f       	add	r30, r22
-		;adc r31,	0			;pull in the carry from previous, if any
-		
-		// update hardware SP
-		ld	r23,	Z+			;load new thread's low SP byte
  19c:	71 91       	ld	r23, Z+
-		ld	r24,	Z			;load new thread's high SP byte
  19e:	80 81       	ld	r24, Z
-		sts	(0x5d),	r23			;change lower SP byte
  1a0:	70 93 5d 00 	sts	0x005D, r23
-		sts (0x5e),	r24			;change upper SP byte
  1a4:	80 93 5e 00 	sts	0x005E, r24
-
-		// Restore registers
-		pop	r17
  1a8:	1f 91       	pop	r17
-		pop	r16
  1aa:	0f 91       	pop	r16
-		pop	r15
  1ac:	ff 90       	pop	r15
-		pop	r14
  1ae:	ef 90       	pop	r14
-		pop	r13
  1b0:	df 90       	pop	r13
-		pop	r12
  1b2:	cf 90       	pop	r12
-		pop	r11
  1b4:	bf 90       	pop	r11
-		pop	r10
  1b6:	af 90       	pop	r10
-		pop	r9
  1b8:	9f 90       	pop	r9
-		pop	r8
  1ba:	8f 90       	pop	r8
-		pop	r7
  1bc:	7f 90       	pop	r7
-		pop	r6
  1be:	6f 90       	pop	r6
-		pop	r5
  1c0:	5f 90       	pop	r5
-		pop	r4
  1c2:	4f 90       	pop	r4
-		pop	r3
  1c4:	3f 90       	pop	r3
-		pop	r2
  1c6:	2f 90       	pop	r2
-		pop	r29
  1c8:	df 91       	pop	r29
-		pop	r28
  1ca:	cf 91       	pop	r28
-
-		// Return to next thread
-		ret
  1cc:	08 95       	ret
 
 000001ce <x_init>:
-/*
- * Initializes kernel data structures, sets stack pointer
- * to Thread0 stack area returns to caller. The calling
- * function becomes Thread0.
- */
-void x_init() {
  1ce:	cf 93       	push	r28
  1d0:	df 93       	push	r29
-	//initialize stacks
-	stacks[0].pHead = (byte *)TH0_START;
  1d2:	e8 e1       	ldi	r30, 0x18	; 24
  1d4:	f2 e0       	ldi	r31, 0x02	; 2
  1d6:	8f e7       	ldi	r24, 0x7F	; 127
  1d8:	91 e2       	ldi	r25, 0x21	; 33
  1da:	91 83       	std	Z+1, r25	; 0x01
  1dc:	80 83       	st	Z, r24
-	stacks[0].pBase = (byte *)TH0_START;
  1de:	93 83       	std	Z+3, r25	; 0x03
  1e0:	82 83       	std	Z+2, r24	; 0x02
-	stacks[1].pHead = (byte *)TH1_START;
  1e2:	8f ef       	ldi	r24, 0xFF	; 255
  1e4:	90 e2       	ldi	r25, 0x20	; 32
  1e6:	95 83       	std	Z+5, r25	; 0x05
  1e8:	84 83       	std	Z+4, r24	; 0x04
-	stacks[1].pBase = (byte *)TH1_START;
  1ea:	97 83       	std	Z+7, r25	; 0x07
  1ec:	86 83       	std	Z+6, r24	; 0x06
-	stacks[2].pHead = (byte *)TH2_START;
  1ee:	8f e7       	ldi	r24, 0x7F	; 127
  1f0:	90 e2       	ldi	r25, 0x20	; 32
  1f2:	91 87       	std	Z+9, r25	; 0x09
  1f4:	80 87       	std	Z+8, r24	; 0x08
-	stacks[2].pBase = (byte *)TH2_START;
  1f6:	93 87       	std	Z+11, r25	; 0x0b
  1f8:	82 87       	std	Z+10, r24	; 0x0a
-	stacks[3].pHead = (byte *)TH3_START;
  1fa:	8f ef       	ldi	r24, 0xFF	; 255
  1fc:	9f e1       	ldi	r25, 0x1F	; 31
  1fe:	95 87       	std	Z+13, r25	; 0x0d
  200:	84 87       	std	Z+12, r24	; 0x0c
-	stacks[3].pBase = (byte *)TH3_START;
  202:	97 87       	std	Z+15, r25	; 0x0f
  204:	86 87       	std	Z+14, r24	; 0x0e
-	stacks[4].pHead = (byte *)TH4_START;
  206:	8f e7       	ldi	r24, 0x7F	; 127
  208:	9f e1       	ldi	r25, 0x1F	; 31
  20a:	91 8b       	std	Z+17, r25	; 0x11
  20c:	80 8b       	std	Z+16, r24	; 0x10
-	stacks[4].pBase = (byte *)TH4_START;
  20e:	93 8b       	std	Z+19, r25	; 0x13
  210:	82 8b       	std	Z+18, r24	; 0x12
-	stacks[5].pHead = (byte *)TH5_START;
  212:	8f ef       	ldi	r24, 0xFF	; 255
  214:	9e e1       	ldi	r25, 0x1E	; 30
  216:	95 8b       	std	Z+21, r25	; 0x15
  218:	84 8b       	std	Z+20, r24	; 0x14
-	stacks[5].pBase = (byte *)TH5_START;
  21a:	97 8b       	std	Z+23, r25	; 0x17
  21c:	86 8b       	std	Z+22, r24	; 0x16
-	stacks[6].pHead = (byte *)TH6_START;
  21e:	8f e7       	ldi	r24, 0x7F	; 127
  220:	9e e1       	ldi	r25, 0x1E	; 30
  222:	91 8f       	std	Z+25, r25	; 0x19
  224:	80 8f       	std	Z+24, r24	; 0x18
-	stacks[6].pBase = (byte *)TH6_START;
  226:	93 8f       	std	Z+27, r25	; 0x1b
  228:	82 8f       	std	Z+26, r24	; 0x1a
-	stacks[7].pHead = (byte *)TH7_START;
  22a:	8f ef       	ldi	r24, 0xFF	; 255
  22c:	9d e1       	ldi	r25, 0x1D	; 29
  22e:	95 8f       	std	Z+29, r25	; 0x1d
  230:	84 8f       	std	Z+28, r24	; 0x1c
-	stacks[7].pBase = (byte *)TH7_START;
  232:	97 8f       	std	Z+31, r25	; 0x1f
  234:	86 8f       	std	Z+30, r24	; 0x1e
-
-	//initialize canaries
-	byte * curr_canary = (byte *)TH0_CANARY;
-	*curr_canary = CANARY_VALUE;
  236:	8a ea       	ldi	r24, 0xAA	; 170
  238:	80 93 00 21 	sts	0x2100, r24
-	curr_canary = (byte *)TH1_CANARY;
-	*curr_canary = CANARY_VALUE;
  23c:	80 93 80 20 	sts	0x2080, r24
-	curr_canary = (byte *)TH2_CANARY;
-	*curr_canary = CANARY_VALUE;
  240:	80 93 00 20 	sts	0x2000, r24
-	curr_canary = (byte *)TH3_CANARY;
-	*curr_canary = CANARY_VALUE;
  244:	80 93 80 1f 	sts	0x1F80, r24
-	curr_canary = (byte *)TH4_CANARY;
-	*curr_canary = CANARY_VALUE;
  248:	80 93 00 1f 	sts	0x1F00, r24
-	curr_canary = (byte *)TH5_CANARY;
-	*curr_canary = CANARY_VALUE;
  24c:	80 93 80 1e 	sts	0x1E80, r24
-	curr_canary = (byte *)TH6_CANARY;
-	*curr_canary = CANARY_VALUE;
  250:	80 93 00 1e 	sts	0x1E00, r24
-	curr_canary = (byte *)TH7_CANARY;
-	*curr_canary = CANARY_VALUE;
  254:	80 93 80 1d 	sts	0x1D80, r24
-
-	//initialize counter
-	ticks = 0;
  258:	10 92 14 02 	sts	0x0214, r1
  25c:	10 92 15 02 	sts	0x0215, r1
  260:	10 92 16 02 	sts	0x0216, r1
  264:	10 92 17 02 	sts	0x0217, r1
-
-	//Initialize Delays
-	x_thread_delay[0] = 0;
  268:	e4 e0       	ldi	r30, 0x04	; 4
  26a:	f2 e0       	ldi	r31, 0x02	; 2
  26c:	11 82       	std	Z+1, r1	; 0x01
  26e:	10 82       	st	Z, r1
-	x_thread_delay[1] = 0;
  270:	13 82       	std	Z+3, r1	; 0x03
  272:	12 82       	std	Z+2, r1	; 0x02
-	x_thread_delay[2] = 0;
  274:	15 82       	std	Z+5, r1	; 0x05
  276:	14 82       	std	Z+4, r1	; 0x04
-	x_thread_delay[3] = 0;
  278:	17 82       	std	Z+7, r1	; 0x07
  27a:	16 82       	std	Z+6, r1	; 0x06
-	x_thread_delay[4] = 0;
  27c:	11 86       	std	Z+9, r1	; 0x09
  27e:	10 86       	std	Z+8, r1	; 0x08
-	x_thread_delay[5] = 0;
  280:	13 86       	std	Z+11, r1	; 0x0b
  282:	12 86       	std	Z+10, r1	; 0x0a
-	x_thread_delay[6] = 0;
  284:	15 86       	std	Z+13, r1	; 0x0d
  286:	14 86       	std	Z+12, r1	; 0x0c
-	x_thread_delay[7] = 0;
  288:	17 86       	std	Z+15, r1	; 0x0f
  28a:	16 86       	std	Z+14, r1	; 0x0e
-
-	//Disable all but thread 0
-	disables = 0xFE;
  28c:	8e ef       	ldi	r24, 0xFE	; 254
  28e:	80 93 01 02 	sts	0x0201, r24
-
-	//Set initial statuses
-	delays = 0;
  292:	10 92 02 02 	sts	0x0202, r1
-	suspends = 0;
  296:	10 92 03 02 	sts	0x0203, r1
-
-	//Configure this to return as thread 0
-	x_thread_id = 0;
  29a:	10 92 00 02 	sts	0x0200, r1
-	x_thread_mask = 0x01;
  29e:	81 e0       	ldi	r24, 0x01	; 1
  2a0:	80 93 38 02 	sts	0x0238, r24
-
-	//initialize delay timer settings
-	TCCR0A = 0x02; // CTC mode
  2a4:	82 e0       	ldi	r24, 0x02	; 2
  2a6:	84 bd       	out	0x24, r24	; 36
-	OCR0A = 250; //match at 250 (1 msec)
  2a8:	9a ef       	ldi	r25, 0xFA	; 250
  2aa:	97 bd       	out	0x27, r25	; 39
-	TIMSK0 = 0x02; //enable compare-match A interrupt
  2ac:	80 93 6e 00 	sts	0x006E, r24
-	TCCR0B = 0x03; //enable global interrupts
  2b0:	83 e0       	ldi	r24, 0x03	; 3
  2b2:	85 bd       	out	0x25, r24	; 37
-
-	//Change the stack location to Thread 0's space
-	int i = 0;
-	byte * newStack = TH0_START;
-	//iterate across the old stack and copy all values
-	for (; STACK_START-i >= SP; i++) {
  2b4:	8d b7       	in	r24, 0x3d	; 61
  2b6:	9e b7       	in	r25, 0x3e	; 62
  2b8:	81 15       	cp	r24, r1
@@ -597,7 +384,6 @@ void x_init() {
  2c6:	c1 e0       	ldi	r28, 0x01	; 1
  2c8:	d2 e2       	ldi	r29, 0x22	; 34
  2ca:	fc 01       	movw	r30, r24
-		*(newStack-i) = *((byte *)STACK_START-i);
  2cc:	22 91       	ld	r18, -Z
  2ce:	2e 93       	st	-X, r18
  2d0:	be 01       	movw	r22, r28
@@ -606,12 +392,6 @@ void x_init() {
  2d6:	9c 01       	movw	r18, r24
  2d8:	22 50       	subi	r18, 0x02	; 2
  2da:	31 09       	sbc	r19, r1
-
-	//Change the stack location to Thread 0's space
-	int i = 0;
-	byte * newStack = TH0_START;
-	//iterate across the old stack and copy all values
-	for (; STACK_START-i >= SP; i++) {
  2dc:	4d b7       	in	r20, 0x3d	; 61
  2de:	5e b7       	in	r21, 0x3e	; 62
  2e0:	cf 01       	movw	r24, r30
@@ -619,55 +399,25 @@ void x_init() {
  2e4:	35 07       	cpc	r19, r21
  2e6:	88 f7       	brcc	.-30     	; 0x2ca <x_init+0xfc>
  2e8:	02 c0       	rjmp	.+4      	; 0x2ee <x_init+0x120>
-	TIMSK0 = 0x02; //enable compare-match A interrupt
-	TCCR0B = 0x03; //enable global interrupts
-
-
-	//Change the stack location to Thread 0's space
-	int i = 0;
  2ea:	60 e0       	ldi	r22, 0x00	; 0
  2ec:	70 e0       	ldi	r23, 0x00	; 0
-	for (; STACK_START-i >= SP; i++) {
-		*(newStack-i) = *((byte *)STACK_START-i);
-	}
-	
-	//disable interrupts
-	cli();
  2ee:	f8 94       	cli
-	//Set new stack pointer. +1 compensates for final
-	//increment of i.
-	SP = (int)TH0_START-i+1;
  2f0:	80 e8       	ldi	r24, 0x80	; 128
  2f2:	91 e2       	ldi	r25, 0x21	; 33
  2f4:	86 1b       	sub	r24, r22
  2f6:	97 0b       	sbc	r25, r23
  2f8:	9e bf       	out	0x3e, r25	; 62
  2fa:	8d bf       	out	0x3d, r24	; 61
-	//set global interrupt enable
-	sei();
  2fc:	78 94       	sei
-	return;
-}
  2fe:	df 91       	pop	r29
  300:	cf 91       	pop	r28
  302:	08 95       	ret
 
 00000304 <x_new>:
- * thread is replaced and rescheduling takes place.
- *
- * Note: This function MAY NOT be called from an
- * interrupt handler.
- */
-void x_new(byte tid, PTHREAD pthread, byte isEnabled) {
  304:	0f 93       	push	r16
  306:	1f 93       	push	r17
-
-	byte low = (byte) (((int) pthread) & 0xff);
  308:	06 2f       	mov	r16, r22
  30a:	17 2f       	mov	r17, r23
-	byte mid = (byte) ((((int) pthread) & 0xff00) >> 8);
-	byte high = (byte) ((((int) pthread) & 0xff0000) >> 16);
-	*(stacks[tid].pHead) = low;//lowbyte address
  30c:	e8 2f       	mov	r30, r24
  30e:	f0 e0       	ldi	r31, 0x00	; 0
  310:	ee 0f       	add	r30, r30
@@ -678,228 +428,152 @@ void x_new(byte tid, PTHREAD pthread, byte isEnabled) {
  31a:	fd 4f       	sbci	r31, 0xFD	; 253
  31c:	a0 81       	ld	r26, Z
  31e:	b1 81       	ldd	r27, Z+1	; 0x01
- * Note: This function MAY NOT be called from an
- * interrupt handler.
- */
-void x_new(byte tid, PTHREAD pthread, byte isEnabled) {
-
-	byte low = (byte) (((int) pthread) & 0xff);
  320:	6c 93       	st	X, r22
-	byte mid = (byte) ((((int) pthread) & 0xff00) >> 8);
-	byte high = (byte) ((((int) pthread) & 0xff0000) >> 16);
-	*(stacks[tid].pHead) = low;//lowbyte address
-	stacks[tid].pHead -= 1;
  322:	a0 81       	ld	r26, Z
  324:	b1 81       	ldd	r27, Z+1	; 0x01
  326:	11 97       	sbiw	r26, 0x01	; 1
  328:	b1 83       	std	Z+1, r27	; 0x01
  32a:	a0 83       	st	Z, r26
- * interrupt handler.
- */
-void x_new(byte tid, PTHREAD pthread, byte isEnabled) {
-
-	byte low = (byte) (((int) pthread) & 0xff);
-	byte mid = (byte) ((((int) pthread) & 0xff00) >> 8);
  32c:	7c 93       	st	X, r23
-	byte high = (byte) ((((int) pthread) & 0xff0000) >> 16);
-	*(stacks[tid].pHead) = low;//lowbyte address
-	stacks[tid].pHead -= 1;
-	*(stacks[tid].pHead) = mid;//midbyte address
-	stacks[tid].pHead -= 1;
  32e:	a0 81       	ld	r26, Z
  330:	b1 81       	ldd	r27, Z+1	; 0x01
  332:	11 97       	sbiw	r26, 0x01	; 1
  334:	b1 83       	std	Z+1, r27	; 0x01
  336:	a0 83       	st	Z, r26
- */
-void x_new(byte tid, PTHREAD pthread, byte isEnabled) {
-
-	byte low = (byte) (((int) pthread) & 0xff);
-	byte mid = (byte) ((((int) pthread) & 0xff00) >> 8);
-	byte high = (byte) ((((int) pthread) & 0xff0000) >> 16);
  338:	01 2e       	mov	r0, r17
  33a:	00 0c       	add	r0, r0
  33c:	22 0b       	sbc	r18, r18
  33e:	33 0b       	sbc	r19, r19
  340:	3c 93       	st	X, r19
-	*(stacks[tid].pHead) = low;//lowbyte address
-	stacks[tid].pHead -= 1;
-	*(stacks[tid].pHead) = mid;//midbyte address
-	stacks[tid].pHead -= 1;
-	*(stacks[tid].pHead) = high;//highbyte address
-	stacks[tid].pHead -= 1;
  342:	a0 81       	ld	r26, Z
  344:	b1 81       	ldd	r27, Z+1	; 0x01
-
-	//save register values
-	stacks[tid].pHead -= 1;
  346:	12 97       	sbiw	r26, 0x02	; 2
  348:	b1 83       	std	Z+1, r27	; 0x01
  34a:	a0 83       	st	Z, r26
-	*(stacks[tid].pHead) = 28;
  34c:	9c e1       	ldi	r25, 0x1C	; 28
  34e:	9c 93       	st	X, r25
-	stacks[tid].pHead -= 1;
  350:	a0 81       	ld	r26, Z
  352:	b1 81       	ldd	r27, Z+1	; 0x01
  354:	11 97       	sbiw	r26, 0x01	; 1
  356:	b1 83       	std	Z+1, r27	; 0x01
  358:	a0 83       	st	Z, r26
-	*(stacks[tid].pHead) = 29;
  35a:	9d e1       	ldi	r25, 0x1D	; 29
  35c:	9c 93       	st	X, r25
-	*(stacks[tid].pHead) = 2;
  35e:	a0 81       	ld	r26, Z
  360:	b1 81       	ldd	r27, Z+1	; 0x01
  362:	92 e0       	ldi	r25, 0x02	; 2
  364:	9c 93       	st	X, r25
-	stacks[tid].pHead -= 1;
  366:	a0 81       	ld	r26, Z
  368:	b1 81       	ldd	r27, Z+1	; 0x01
  36a:	11 97       	sbiw	r26, 0x01	; 1
  36c:	b1 83       	std	Z+1, r27	; 0x01
  36e:	a0 83       	st	Z, r26
-	*(stacks[tid].pHead) = 3;
  370:	93 e0       	ldi	r25, 0x03	; 3
  372:	9c 93       	st	X, r25
-	stacks[tid].pHead -= 1;
  374:	a0 81       	ld	r26, Z
  376:	b1 81       	ldd	r27, Z+1	; 0x01
  378:	11 97       	sbiw	r26, 0x01	; 1
  37a:	b1 83       	std	Z+1, r27	; 0x01
  37c:	a0 83       	st	Z, r26
-	*(stacks[tid].pHead) = 4;
  37e:	94 e0       	ldi	r25, 0x04	; 4
  380:	9c 93       	st	X, r25
-	stacks[tid].pHead -= 1;
  382:	a0 81       	ld	r26, Z
  384:	b1 81       	ldd	r27, Z+1	; 0x01
  386:	11 97       	sbiw	r26, 0x01	; 1
  388:	b1 83       	std	Z+1, r27	; 0x01
  38a:	a0 83       	st	Z, r26
-	*(stacks[tid].pHead) = 5;
  38c:	95 e0       	ldi	r25, 0x05	; 5
  38e:	9c 93       	st	X, r25
-	stacks[tid].pHead -= 1;
  390:	a0 81       	ld	r26, Z
  392:	b1 81       	ldd	r27, Z+1	; 0x01
  394:	11 97       	sbiw	r26, 0x01	; 1
  396:	b1 83       	std	Z+1, r27	; 0x01
  398:	a0 83       	st	Z, r26
-	*(stacks[tid].pHead) = 6;
  39a:	96 e0       	ldi	r25, 0x06	; 6
  39c:	9c 93       	st	X, r25
-	stacks[tid].pHead -= 1;
  39e:	a0 81       	ld	r26, Z
  3a0:	b1 81       	ldd	r27, Z+1	; 0x01
  3a2:	11 97       	sbiw	r26, 0x01	; 1
  3a4:	b1 83       	std	Z+1, r27	; 0x01
  3a6:	a0 83       	st	Z, r26
-	*(stacks[tid].pHead) = 7;
  3a8:	97 e0       	ldi	r25, 0x07	; 7
  3aa:	9c 93       	st	X, r25
-	stacks[tid].pHead -= 1;
  3ac:	a0 81       	ld	r26, Z
  3ae:	b1 81       	ldd	r27, Z+1	; 0x01
  3b0:	11 97       	sbiw	r26, 0x01	; 1
  3b2:	b1 83       	std	Z+1, r27	; 0x01
  3b4:	a0 83       	st	Z, r26
-	*(stacks[tid].pHead) = 8;
  3b6:	98 e0       	ldi	r25, 0x08	; 8
  3b8:	9c 93       	st	X, r25
-	stacks[tid].pHead -= 1;
  3ba:	a0 81       	ld	r26, Z
  3bc:	b1 81       	ldd	r27, Z+1	; 0x01
  3be:	11 97       	sbiw	r26, 0x01	; 1
  3c0:	b1 83       	std	Z+1, r27	; 0x01
  3c2:	a0 83       	st	Z, r26
-	*(stacks[tid].pHead) = 9;
  3c4:	99 e0       	ldi	r25, 0x09	; 9
  3c6:	9c 93       	st	X, r25
-	stacks[tid].pHead -= 1;
  3c8:	a0 81       	ld	r26, Z
  3ca:	b1 81       	ldd	r27, Z+1	; 0x01
  3cc:	11 97       	sbiw	r26, 0x01	; 1
  3ce:	b1 83       	std	Z+1, r27	; 0x01
  3d0:	a0 83       	st	Z, r26
-	*(stacks[tid].pHead) = 10;
  3d2:	9a e0       	ldi	r25, 0x0A	; 10
  3d4:	9c 93       	st	X, r25
-	stacks[tid].pHead -= 1;
  3d6:	a0 81       	ld	r26, Z
  3d8:	b1 81       	ldd	r27, Z+1	; 0x01
  3da:	11 97       	sbiw	r26, 0x01	; 1
  3dc:	b1 83       	std	Z+1, r27	; 0x01
  3de:	a0 83       	st	Z, r26
-	*(stacks[tid].pHead) = 11;
  3e0:	9b e0       	ldi	r25, 0x0B	; 11
  3e2:	9c 93       	st	X, r25
-	stacks[tid].pHead -= 1;
  3e4:	a0 81       	ld	r26, Z
  3e6:	b1 81       	ldd	r27, Z+1	; 0x01
  3e8:	11 97       	sbiw	r26, 0x01	; 1
  3ea:	b1 83       	std	Z+1, r27	; 0x01
  3ec:	a0 83       	st	Z, r26
-	*(stacks[tid].pHead) = 12;
  3ee:	9c e0       	ldi	r25, 0x0C	; 12
  3f0:	9c 93       	st	X, r25
-	stacks[tid].pHead -= 1;
  3f2:	a0 81       	ld	r26, Z
  3f4:	b1 81       	ldd	r27, Z+1	; 0x01
  3f6:	11 97       	sbiw	r26, 0x01	; 1
  3f8:	b1 83       	std	Z+1, r27	; 0x01
  3fa:	a0 83       	st	Z, r26
-	*(stacks[tid].pHead) = 13;
  3fc:	9d e0       	ldi	r25, 0x0D	; 13
  3fe:	9c 93       	st	X, r25
-	stacks[tid].pHead -= 1;
  400:	a0 81       	ld	r26, Z
  402:	b1 81       	ldd	r27, Z+1	; 0x01
  404:	11 97       	sbiw	r26, 0x01	; 1
  406:	b1 83       	std	Z+1, r27	; 0x01
  408:	a0 83       	st	Z, r26
-	*(stacks[tid].pHead) = 14;
  40a:	9e e0       	ldi	r25, 0x0E	; 14
  40c:	9c 93       	st	X, r25
-	stacks[tid].pHead -= 1;
  40e:	a0 81       	ld	r26, Z
  410:	b1 81       	ldd	r27, Z+1	; 0x01
  412:	11 97       	sbiw	r26, 0x01	; 1
  414:	b1 83       	std	Z+1, r27	; 0x01
  416:	a0 83       	st	Z, r26
-	*(stacks[tid].pHead) = 15;
  418:	9f e0       	ldi	r25, 0x0F	; 15
  41a:	9c 93       	st	X, r25
-	stacks[tid].pHead -= 1;
  41c:	a0 81       	ld	r26, Z
  41e:	b1 81       	ldd	r27, Z+1	; 0x01
  420:	11 97       	sbiw	r26, 0x01	; 1
  422:	b1 83       	std	Z+1, r27	; 0x01
  424:	a0 83       	st	Z, r26
-	*(stacks[tid].pHead) = 16;
  426:	90 e1       	ldi	r25, 0x10	; 16
  428:	9c 93       	st	X, r25
-	stacks[tid].pHead -= 1;
  42a:	a0 81       	ld	r26, Z
  42c:	b1 81       	ldd	r27, Z+1	; 0x01
  42e:	11 97       	sbiw	r26, 0x01	; 1
  430:	b1 83       	std	Z+1, r27	; 0x01
  432:	a0 83       	st	Z, r26
-	*(stacks[tid].pHead) = 17;
  434:	91 e1       	ldi	r25, 0x11	; 17
  436:	9c 93       	st	X, r25
-	stacks[tid].pHead -= 1;
  438:	20 81       	ld	r18, Z
  43a:	31 81       	ldd	r19, Z+1	; 0x01
  43c:	21 50       	subi	r18, 0x01	; 1
  43e:	31 09       	sbc	r19, r1
  440:	31 83       	std	Z+1, r19	; 0x01
  442:	20 83       	st	Z, r18
-
-
-	//create a bytemask to enable/disable a thread
-	byte mask = 1;
-	mask = mask << tid;
  444:	21 e0       	ldi	r18, 0x01	; 1
  446:	30 e0       	ldi	r19, 0x00	; 0
  448:	08 2e       	mov	r0, r24
@@ -908,54 +582,31 @@ void x_new(byte tid, PTHREAD pthread, byte isEnabled) {
  44e:	33 1f       	adc	r19, r19
  450:	0a 94       	dec	r0
  452:	e2 f7       	brpl	.-8      	; 0x44c <x_new+0x148>
-
-	if (isEnabled) {
  454:	44 23       	and	r20, r20
  456:	39 f0       	breq	.+14     	; 0x466 <x_new+0x162>
-	//Enable the thread
-		disables &= (~mask);
  458:	20 95       	com	r18
  45a:	90 91 01 02 	lds	r25, 0x0201
  45e:	29 23       	and	r18, r25
  460:	20 93 01 02 	sts	0x0201, r18
  464:	05 c0       	rjmp	.+10     	; 0x470 <x_new+0x16c>
-	} else {
-		//disable the thread
-		disables |= mask;
  466:	90 91 01 02 	lds	r25, 0x0201
  46a:	29 2b       	or	r18, r25
  46c:	20 93 01 02 	sts	0x0201, r18
-	}
-	if (tid == x_thread_id) {
  470:	90 91 00 02 	lds	r25, 0x0200
  474:	89 13       	cpse	r24, r25
  476:	01 c0       	rjmp	.+2      	; 0x47a <x_new+0x176>
-		//we've just overwritten the current thread, so reschedule
-		x_schedule();
  478:	6b de       	rcall	.-810    	; 0x150 <x_schedule>
-	}
-}
  47a:	1f 91       	pop	r17
  47c:	0f 91       	pop	r16
  47e:	08 95       	ret
 
 00000480 <x_delay>:
- * tick frequency, set at system initialization.
- *
- * Note: This function MAY NOT be called from an
- * interrupt handler.
- */
-void x_delay(int ticks) {
  480:	9c 01       	movw	r18, r24
-	//disable this thread
-	delays |= x_thread_mask;
  482:	80 91 02 02 	lds	r24, 0x0202
  486:	90 91 38 02 	lds	r25, 0x0238
  48a:	98 2b       	or	r25, r24
  48c:	90 93 02 02 	sts	0x0202, r25
-	cli(); //disable interrupts
  490:	f8 94       	cli
-	x_thread_delay[x_thread_id] = ticks;
  492:	e0 91 00 02 	lds	r30, 0x0200
  496:	f0 e0       	ldi	r31, 0x00	; 0
  498:	ee 0f       	add	r30, r30
@@ -964,19 +615,11 @@ void x_delay(int ticks) {
  49e:	fd 4f       	sbci	r31, 0xFD	; 253
  4a0:	31 83       	std	Z+1, r19	; 0x01
  4a2:	20 83       	st	Z, r18
-	sei(); //enable interrupts
  4a4:	78 94       	sei
-	x_yield(); //reschedule
  4a6:	31 ce       	rjmp	.-926    	; 0x10a <x_yield>
  4a8:	08 95       	ret
 
 000004aa <__vector_21>:
-/*
- * The interrupt service routine for timer0.
- * Decrements delays for all threads and enables threads
- * whose delay values reach zero.
- */
-ISR(TIMER0_COMPA_vect){
  4aa:	1f 92       	push	r1
  4ac:	0f 92       	push	r0
  4ae:	0f b6       	in	r0, 0x3f	; 63
@@ -996,23 +639,10 @@ ISR(TIMER0_COMPA_vect){
  4ca:	ef 93       	push	r30
  4cc:	ff 93       	push	r31
  4ce:	60 91 02 02 	lds	r22, 0x0202
-	int i = 0;
  4d2:	80 e0       	ldi	r24, 0x00	; 0
  4d4:	90 e0       	ldi	r25, 0x00	; 0
-			x_thread_delay[i]--;
-		}
-		//if the current thread isn't disabled
-		if (x_thread_delay[i] == 0) {
-			//enable this thread
-			delays &= ~(0x1 << i);
  4d6:	41 e0       	ldi	r20, 0x01	; 1
  4d8:	50 e0       	ldi	r21, 0x00	; 0
- */
-ISR(TIMER0_COMPA_vect){
-	int i = 0;
-	for (; i < NUM_THREADS; i++) {
-		//if the count is nonzero
-		if (x_thread_delay[i] > 0) {
  4da:	fc 01       	movw	r30, r24
  4dc:	ee 0f       	add	r30, r30
  4de:	ff 1f       	adc	r31, r31
@@ -1022,8 +652,6 @@ ISR(TIMER0_COMPA_vect){
  4e6:	31 81       	ldd	r19, Z+1	; 0x01
  4e8:	23 2b       	or	r18, r19
  4ea:	59 f0       	breq	.+22     	; 0x502 <__vector_21+0x58>
-			//decrement the count
-			x_thread_delay[i]--;
  4ec:	fc 01       	movw	r30, r24
  4ee:	ee 0f       	add	r30, r30
  4f0:	ff 1f       	adc	r31, r31
@@ -1035,9 +663,6 @@ ISR(TIMER0_COMPA_vect){
  4fc:	31 09       	sbc	r19, r1
  4fe:	31 83       	std	Z+1, r19	; 0x01
  500:	20 83       	st	Z, r18
-		}
-		//if the current thread isn't disabled
-		if (x_thread_delay[i] == 0) {
  502:	fc 01       	movw	r30, r24
  504:	ee 0f       	add	r30, r30
  506:	ff 1f       	adc	r31, r31
@@ -1047,8 +672,6 @@ ISR(TIMER0_COMPA_vect){
  50e:	31 81       	ldd	r19, Z+1	; 0x01
  510:	23 2b       	or	r18, r19
  512:	49 f4       	brne	.+18     	; 0x526 <__vector_21+0x7c>
-			//enable this thread
-			delays &= ~(0x1 << i);
  514:	9a 01       	movw	r18, r20
  516:	08 2e       	mov	r0, r24
  518:	02 c0       	rjmp	.+4      	; 0x51e <__vector_21+0x74>
@@ -1058,23 +681,11 @@ ISR(TIMER0_COMPA_vect){
  520:	e2 f7       	brpl	.-8      	; 0x51a <__vector_21+0x70>
  522:	20 95       	com	r18
  524:	62 23       	and	r22, r18
- * Decrements delays for all threads and enables threads
- * whose delay values reach zero.
- */
-ISR(TIMER0_COMPA_vect){
-	int i = 0;
-	for (; i < NUM_THREADS; i++) {
  526:	01 96       	adiw	r24, 0x01	; 1
  528:	88 30       	cpi	r24, 0x08	; 8
  52a:	91 05       	cpc	r25, r1
  52c:	b1 f6       	brne	.-84     	; 0x4da <__vector_21+0x30>
  52e:	60 93 02 02 	sts	0x0202, r22
-		if (x_thread_delay[i] == 0) {
-			//enable this thread
-			delays &= ~(0x1 << i);
-		}
-	}
-	ticks++;
  532:	80 91 14 02 	lds	r24, 0x0214
  536:	90 91 15 02 	lds	r25, 0x0215
  53a:	a0 91 16 02 	lds	r26, 0x0216
@@ -1086,7 +697,6 @@ ISR(TIMER0_COMPA_vect){
  54c:	90 93 15 02 	sts	0x0215, r25
  550:	a0 93 16 02 	sts	0x0216, r26
  554:	b0 93 17 02 	sts	0x0217, r27
-}
  558:	ff 91       	pop	r31
  55a:	ef 91       	pop	r30
  55c:	bf 91       	pop	r27
@@ -1107,11 +717,11 @@ ISR(TIMER0_COMPA_vect){
  57a:	18 95       	reti
 
 0000057c <green>:
-/*	DDRB=0x80;
-	while(1) {
-		PORTB ^= 0x80;
-		x_delay(1000);
-	}*/
+
+/*
+ * A thread that blinks a green LED on output 11
+ */
+void green() {
 	set_output(DDRB, led11);
  57c:	25 9a       	sbi	0x04, 5	; 4
 	int wait = 2000;
@@ -1133,8 +743,10 @@ ISR(TIMER0_COMPA_vect){
  58e:	f7 cf       	rjmp	.-18     	; 0x57e <green+0x2>
 
 00000590 <red>:
-}
 
+/*
+ * A thread that blinks a red LED on output 12
+ */
 void red() {
 	set_output(DDRB, led12);
  590:	26 9a       	sbi	0x04, 6	; 4
