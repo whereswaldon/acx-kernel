@@ -10,6 +10,7 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include "acx.h"
+#include "serial.h"
 
 /*
  * A thread that blinks a green LED on output 11
@@ -41,9 +42,18 @@ void red() {
 	}
 }
 
+void serial_test() {
+	serial_open(192000, SERIAL_8N1);
+	char c;
+	while(1) {
+		c = serial_read();
+		serial_write(c);
+	}
+}
+
 int main(void)
 {
 	x_init();
-	x_new(1, red, 1);
-	x_new(0, green, 1);
+	//x_new(1, red, 1);
+	x_new(0, serial_test, 1);
 }
